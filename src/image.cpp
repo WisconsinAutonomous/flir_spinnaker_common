@@ -20,7 +20,7 @@ Image::Image(
   uint64_t t, int16_t brightness, uint32_t et, uint32_t maxEt, float gain,
   uint64_t imgT, size_t imageSize, int status, const void * data, size_t w,
   size_t h, size_t stride, size_t bitsPerPixel, size_t numChan,
-  uint64_t frameId, pixel_format::PixelFormat pixFmt)
+  uint64_t frameId, int64_t pixFmt)
 : time_(t),
   brightness_(brightness),
   exposureTime_(et),

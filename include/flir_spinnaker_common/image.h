@@ -16,8 +16,6 @@
 #ifndef FLIR_SPINNAKER_COMMON__IMAGE_H_
 #define FLIR_SPINNAKER_COMMON__IMAGE_H_
 
-#include <flir_spinnaker_common/pixel_format.h>
-
 #include <memory>
 
 namespace flir_spinnaker_common
@@ -29,7 +27,7 @@ public:
     uint64_t t, int16_t brightness, uint32_t et, uint32_t maxEt, float gain,
     uint64_t imgT, size_t imageSize, int status, const void * data, size_t w,
     size_t h, size_t stride, size_t bitsPerPixel, size_t numChan,
-    uint64_t frameId, pixel_format::PixelFormat pixFmt);
+    uint64_t frameId, int64_t pixFmt);
 
   // ----- variables --
   uint64_t time_;
@@ -47,7 +45,7 @@ public:
   size_t bitsPerPixel_;
   size_t numChan_;
   uint64_t frameId_;
-  pixel_format::PixelFormat pixelFormat_;
+  int64_t pixelFormat_;
 
 private:
 };

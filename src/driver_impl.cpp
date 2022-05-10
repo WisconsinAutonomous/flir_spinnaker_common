@@ -191,7 +191,6 @@ static std::string set_parameter(
   const std::string & nodeName, T2 val, T2 * retVal,
   const Spinnaker::CameraPtr & cam, bool debug)
 {
-  *retVal = std::nan("");
   GenApi::CNodePtr np = genicam_utils::find_node(nodeName, cam, debug);
   std::string msg;
   if (!common_checks(np, nodeName, &msg)) {
@@ -214,6 +213,13 @@ std::string DriverImpl::setDouble(
     set_parameter<GenApi::CFloatPtr, double>(nn, val, retVal, camera_, debug_));
 }
 
+std::string DriverImpl::setInt(const std::string & nn, int val, int * retVal)
+{
+  *retVal = val + 1;
+  return (
+    set_parameter<GenApi::CIntegerPtr, int>(nn, val, retVal, camera_, debug_));
+}
+
 std::string DriverImpl::setBool(const std::string & nn, bool val, bool * retVal)
 {
   *retVal = !val;
@@ -233,12 +239,8 @@ static int int_ceil(size_t x, int y)
 }
 
 static int16_t compute_brightness(
-  pixel_format::PixelFormat pf, const uint8_t * data, size_t w, size_t h,
-  size_t stride, int skip)
+  int64_t pf, const uint8_t * data, size_t w, size_t h, size_t stride, int skip)
 {
-  if (pf != pixel_format::BayerRG8) {
-    return (0);
-  }
   const uint64_t cnt = int_ceil(w, skip) * int_ceil(h, skip);
   uint64_t tot = 0;
   const uint8_t * p = data;
@@ -280,8 +282,8 @@ void DriverImpl::OnImageEvent(Spinnaker::ImagePtr imgPtr)
     const float expTime = chunk.GetExposureTime();
     const float gain = chunk.GetGain();
     const int64_t stamp = chunk.GetTimestamp();
-    const uint32_t maxExpTime = (uint32_t)(
-      is_readable(exposureTimeNode_) ? exposureTimeNode_->GetMax() : 0);
+    const uint32_t maxExpTime =
+      (uint32_t)(is_readable(exposureTimeNode_) ? exposureTimeNode_->GetMax() : 0);
 #if 0
     std::cout << "got image: " << imgPtr->GetWidth() << "x"
               << imgPtr->GetHeight() << " stride: " << imgPtr->GetStride()
@@ -383,12 +385,29 @@ bool DriverImpl::stopCamera()
 
 void DriverImpl::setPixelFormat(const std::string & pixFmt)
 {
-  pixelFormat_ = pixel_format::from_nodemap_string(pixFmt);
+  GenApi::INodeMap & nodeMap = camera_->GetNodeMap();
+  GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
+  if (GenApi::IsAvailable(ptrPixelFormat)) {
+    // Retrieve the desired entry node from the enumeration node
+    GenApi::CEnumEntryPtr ptrPixelFormatEntry =
+      ptrPixelFormat->GetEntryByName(pixFmt.c_str());
+    if (
+      GenApi::IsAvailable(ptrPixelFormatEntry) &&
+      GenApi::IsReadable(ptrPixelFormatEntry)) {
+      // Retrieve the integer value from the entry node
+      pixelFormat_ = ptrPixelFormatEntry->GetValue();
+    }
+  }
 }
 
 std::string DriverImpl::getPixelFormat() const
 {
-  return (pixel_format::to_string(pixelFormat_));
+  GenApi::INodeMap & nodeMap = camera_->GetNodeMap();
+  GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
+  return GenApi::IsAvailable(ptrPixelFormat) &&
+             GenApi::IsReadable(ptrPixelFormat)
+           ? ptrPixelFormat->GetCurrentEntry()->GetSymbolic().c_str()
+           : "INVALID";
 }
 
 std::string DriverImpl::getNodeMapAsString()

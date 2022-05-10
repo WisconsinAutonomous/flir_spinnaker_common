@@ -52,6 +52,7 @@ public:
   std::string setEnum(
     const std::string & nodeName, const std::string & val,
     std::string * retVal);
+  std::string setInt(const std::string & nodeName, int val, int * retVal);
   std::string setDouble(
     const std::string & nodeName, double val, double * retVal);
   std::string setBool(const std::string & nodeName, bool val, bool * retVal);
@@ -73,7 +74,7 @@ private:
   bool debug_{false};
   bool computeBrightness_{false};
   int brightnessSkipPixels_{32};
-  pixel_format::PixelFormat pixelFormat_{pixel_format::INVALID};
+  int64_t pixelFormat_{-1};
   Spinnaker::GenApi::CFloatPtr exposureTimeNode_;
 };
 }  // namespace flir_spinnaker_common

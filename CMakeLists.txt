@@ -30,7 +30,6 @@ add_library(flir_spinnaker_common
   src/driver.cpp
   src/driver_impl.cpp
   src/image.cpp
-  src/pixel_format.cpp
   src/genicam_utils.cpp
 )
 

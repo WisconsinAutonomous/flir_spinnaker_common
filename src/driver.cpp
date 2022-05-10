@@ -81,6 +81,15 @@ std::string Driver::setDouble(
   }
 }
 
+std::string Driver::setInt(const std::string & nodeName, int val, int * retVal)
+{
+  try {
+    return (driverImpl_->setInt(nodeName, val, retVal));
+  } catch (const Spinnaker::Exception & e) {
+    throw DriverException(e.what());
+  }
+}
+
 std::string Driver::setBool(
   const std::string & nodeName, bool val, bool * retVal)
 {
